@@ -8,20 +8,25 @@ public class PlayerMovement : MonoBehaviour
     public float forwardForce = 2000f;
     public float sidewaysForce = 500f;
 
-    // Update is called once per frame
+
     void FixedUpdate()
     {
         // add a forward force
         rb.AddForce(0, 0, forwardForce * Time.deltaTime);
 
-        if ( Input.GetKey ("d"))
+        if (Input.GetKey("d"))
         {
-            rb.AddForce(sidewaysForce * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
+            Command turnRight = new TurnRight(rb, sidewaysForce);
+            Invoker invoker = new Invoker();
+            invoker.SetCommand(turnRight);
+            invoker.ExecuteCommand();
         }
-
         if (Input.GetKey("a"))
         {
-            rb.AddForce(-sidewaysForce * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
+            Command turnLeft = new TurnLeft(rb, sidewaysForce);
+            Invoker invoker = new Invoker();
+            invoker.SetCommand(turnLeft);
+            invoker.ExecuteCommand();
         }
 
         if (rb.position.y < -1f)

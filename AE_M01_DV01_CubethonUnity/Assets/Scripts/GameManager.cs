@@ -9,7 +9,31 @@ public class GameManager : MonoBehaviour
     public float restartDelay = 1f;
 
     public GameObject completeLevelUI;
+    public GameObject replayUI;
 
+    bool Replay = false;
+    GameObject player;
+    float replayStartTime;
+
+    void Start()
+    {
+            PlayerMovement playerMovement = FindObjectOfType<PlayerMovement>();
+            player = playerMovement.gameObject;
+
+        if (CommandLog.commands.Count > 0)
+        {
+            Replay = true;
+            replayStartTime = Time.timeSinceLevelLoad;
+        }
+    }
+
+    void Update()
+    {
+        if (Replay)
+        {
+            RunReplay();
+        }
+    }
     public void CompleteLevel ()
     {
         Debug.Log("Level won");
@@ -29,5 +53,27 @@ public class GameManager : MonoBehaviour
     void Restart ()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void RunReplay()
+    {
+        replayUI.SetActive(true);
+
+        Debug.Log("REPLAYING");
+        if (CommandLog.commands.Count == 0)
+        {
+            return;
+        }
+
+        Command command = CommandLog.commands.Peek();
+        if (Time.timeSinceLevelLoad >= command.timestamp)
+        {
+            command = CommandLog.commands.Dequeue();
+            command._player = player.GetComponent<Rigidbody>();
+            Invoker invoker = new Invoker();
+            invoker.disableLog = true;
+            invoker.SetCommand(command);
+            invoker.ExecuteCommand();
+        }
     }
 }
